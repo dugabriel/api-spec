@@ -1,0 +1,241 @@
+openapi: 3.0.2
+info:
+  title: team-members-integrationV1
+  version: 1.0.0
+  description: |
+    API de integração de Equipes de Oportunidades (Opportunity Team Members) V1
+
+    Compatível com a versão V7 do serviço de negócio Opportunity
+  contact: {}
+servers:
+  - url: https://{url}/api/{version}/integration
+    description: Integration Router Server
+    variables:
+      url:
+        default: totvscrm.app
+        description: URL de acesso ao Integration-Router
+      version:
+        default: v1
+        description: Versão do Integration-Router
+paths:
+  /record:
+    get:
+      tags:
+        - Opportunity Team Member
+      parameters:
+        - name: Integration-Filter
+          description: |
+            Filtro opcional para realizar a busca de um ou mais registros. Suporta o uso de
+            RestQuery.
+            
+            
+            Se o header for omitido, lista todos os registros
+            
+            Se o header não contiver valores, lista todos os registros
+          schema:
+            type: string
+          in: header
+          required: false
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
+          description: Returns a list of team members
+        401:
+          description: Unauthorized
+      summary: Listar os membros da equipe que pertencem a uma oportunidade
+      description: Retorna uma lista de membros com base nos filtros no header Integration-Filter
+    post:
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
+      tags:
+        - Opportunity Team Member
+      parameters:
+        - name: Integration-Filter
+          description: |
+            Filtro do registro específico para a ação. Deve-se usar o identificador principal da
+            entidade (ID).
+          schema:
+            type: string
+          in: header
+          required: false
+        - name: Integration-Response
+          description:  |
+            Nível de detalhe do retorno da API. São suportados atualmente:              
+            **full** - Resposta completa, equivalente a um GET no recurso              
+            **minimum** - Resposta mínima, equivalente ao ID, data de criação e atualização do
+            registro              
+            Se o header não for informado, por padrão o retorno será equivalente ao nível
+            **minimum**
+          schema:
+            default: minimum
+            enum:
+              - full
+              - minimum
+            type: string
+        - name: Integration-Action
+          description: |
+            Ação a ser realizada na API de integração. Selecione uma das opções para carregar o
+            body da requisição.
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
+              - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyDelete'
+
+          in: header
+          required: true
+          default: create
+      responses:
+        201:
+          description: Returns a created response
+          default: minimum
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
+                  - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_MinimumResponse'
+                discriminator:
+                  mapping:
+                    full: '#/Opportunity-Team-Members-Integration_V1_FullResponse'
+                    minimum: '#/Opportunity-Team-Members-Integration_V1_MinimumResponse'
+
+        205:
+          description: Returns no content response
+        401:
+          description: Unauthorized
+        404:
+          description: Not found
+      summary: Criar, atualizar e excluir os membros da equipe de uma oportunidade
+      description: |
+        A ação a ser realizada no cadastro depende do valor preenchido no header
+        **Integration-Action**:
+        **create** - Realiza a operação de POST do cadastro enviado;
+        **update** - Realiza a operação de PATCH do cadastro enviado, baseado no ID do registro preenchido no header **Integration-Filter**;
+        **upsert** - Realiza a operação de POST do cadastro enviado se não for enviado ID do registro no header **Integration-Filter** **OU** realiza a operação de PUT do cadastro enviado se for enviado o ID do registro no header **Integration-Filter**;
+        **delete** - Realiza a operação de DELETE do registro especificado no header **Integration-Filter**
+    parameters:
+      - name: Integration-Service
+        description: 'Serviço responsável pela entidade. Exemplo: opportunity'
+        schema:
+          default: opportunity
+          type: string
+        in: header
+        required: true
+      - name: Integration-Resource
+        description: Recurso para requisição. Trocar o opportunityId pelo identificador da
+          oportunidade
+        schema:
+          default: opportunities-integration/{opportunityId}/team-members-integration
+          type: string
+          example: opportunities-integration/c1978a26-0a76-448e-ad53-65f7591478dd/team-members-integration
+        in: header
+        required: true
+      - name: Integration-Version
+        description: 'Versão da API de integração. Exemplo: v1'
+        schema:
+          default: v1
+          type: string
+        in: header
+        required: true
+components:
+  schemas:
+    Opportunity-Team-Members-Integration_V1_MinimumResponse:
+      type: object
+      properties:
+        id:
+          format: UUID
+          type: string
+          example: 738cccd4-fda1-3244-9f21-6712a488dca6
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-28T11:52:27.251Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-28T11:52:27.251Z"
+    Opportunity-Team-Members-Integration_V1_FullResponse:
+      type: object
+      properties:
+        id:
+          format: UUID
+          type: string
+          example: 738cccd4-fda1-3244-9f21-6712a488dca6
+        externalId:
+          type: string
+          example: 11#2306001
+        userId:
+          format: UUID
+          type: string
+          example: 738cccd4-fda1-3244-9f21-6712a488dca6
+        roleId:
+          format: UUID
+          type: string
+          example: 8a8da9eb-f985-4997-8063-3a28bb524e6c
+        createdAt:
+          type: string
+          format: date-time
+          example: "2022-10-28T11:52:27.251Z"
+        updatedAt:
+          type: string
+          format: date-time
+          example: "2022-10-28T11:52:27.251Z"
+        responsible:
+          type: boolean
+          example: true
+        active:
+          type: boolean
+          example: true
+        percentageOfParticipation:
+          type: number
+          example: 1.00
+        allowedActions:
+          type: array
+          items:
+            type: string
+            example: [ READ, UPDATE, TRANSFER, SHARE ]
+    Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert:
+      required:
+        - externalId
+        - userId
+        - roleId
+        - responsible
+        - active
+        - percentageOfParticipation
+        - allowedActions
+      type: object
+      properties:
+        externalId:
+          type: string
+          example: 11#2306001
+        userId:
+          format: UUID
+          type: string
+          example: 738cccd4-fda1-3244-9f21-6712a488dca6
+        roleId:
+          format: UUID
+          type: string
+          example: 8a8da9eb-f985-4997-8063-3a28bb524e6c
+        responsible:
+          type: boolean
+          example: true
+        active:
+          type: boolean
+          example: true
+        percentageOfParticipation:
+          type: number
+          example: 1.00
+        allowedActions:
+          type: array
+          items:
+            type: string
+            example: [READ, UPDATE, TRANSFER, SHARE]
+    Opportunity-Team-Members-Integration_V1_BodyDelete:
+      description: No body
+      type: object
