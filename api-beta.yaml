@@ -64,6 +64,7 @@ paths:
           in: header
           required: false
         - name: Integration-Response
+          in: header
           description:  |
             Nível de detalhe do retorno da API. São suportados atualmente:              
             **full** - Resposta completa, equivalente a um GET no recurso              
@@ -82,19 +83,17 @@ paths:
             Ação a ser realizada na API de integração. Selecione uma das opções para carregar o
             body da requisição.
           schema:
-      	    $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
+           $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
           in: header
           required: true
-          default: create
       responses:
         201:
           description: Returns a created response
-          default: minimum
           content:
             application/json:
               schema:
-  		$ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
-                discriminator:
+               $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
+               discriminator:
                   mapping:
                     full: '#/Opportunity-Team-Members-Integration_V1_FullResponse'
                     minimum: '#/Opportunity-Team-Members-Integration_V1_MinimumResponse'
