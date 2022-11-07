@@ -84,9 +84,7 @@ paths:
             body da requisição.
           schema:
             oneOf:
-              - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
-              - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyDelete'
-
+              $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_BodyCreateUpdateUpsert'
           in: header
           required: true
           default: create
@@ -98,8 +96,7 @@ paths:
             application/json:
               schema:
                 oneOf:
-                  - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
-                  - $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_MinimumResponse'
+                  $ref: '#/components/schemas/Opportunity-Team-Members-Integration_V1_FullResponse'
                 discriminator:
                   mapping:
                     full: '#/Opportunity-Team-Members-Integration_V1_FullResponse'
